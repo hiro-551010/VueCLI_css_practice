@@ -1,29 +1,83 @@
 <template>
   <div class="main">
+    <button @click="myAnimation='slide'">slide</button>
+    <button @click="myAnimation='fade'">fade</button>
+    {{ myAnimation }}
     <button @click="show = !show">切り替え</button>
+
     <!-- nameが無い場合はvが入ってくる -->
-    <transition name="fade">
+    <transition 
+      enter-active-class="animate__animated animate__bounce"
+      leave-active-class="animate__animated animate__shakeX"
+      appear
+    >
       <p v-if="show">hello</p>
     </transition>
-    <transition name="slide">
+
+    <!-- リロード時にanimationを追加するときはappear属性をつける -->
+    <transition :name="myAnimation" appear>
       <div v-if="show">
         <p>bye</p>
         <p>hello</p>
         <p>hello</p>
       </div>
     </transition>
-  </div>
 
+    <transition name="fade" mode="out-in">
+      <p v-if="show" key="hello">こんにちは</p>
+      <p v-else key="bye">さよなら</p>
+    </transition>
+
+    <br>
+    <button @click="myComponent = 'componentA' ">ComponentA</button>
+    <button @click="myComponent = 'componentB' ">ComponentB</button>
+    <transition name="fade" mode="out-in">
+      <component :is="myComponent"></component>
+    </transition>
+    <br>
+    <!-- javascriptフックというものがある -->
+    <transition
+      @before-enter="beforeEnter"
+      @enter="enter"
+      @after-enter="afterEnter"
+      @enter-cancelled="enterCancelled"
+
+      @before-leave="beforeLeave"
+      @leave="leave"
+      @after-leave="afterLeave"
+      @leave-cancelled="leaveCancelled"
+    >
+      <div class="circle" v-if="show"></div>
+    </transition>
+    
+  </div>
 </template>
 
 <script>
-
+import ComponentA from './components/ComponentA.vue'
+import ComponentB from './components/ComponentB.vue'
 
 export default {
+  components: {
+    ComponentA,
+    ComponentB,
+  },
   data() {
     return {
       show: true,
+      myAnimation: "slide",
+      myComponent: 'ComponentA'
     };
+  },
+  methods: {
+    beforeEnter() {},
+    enter() {},
+    afterEnter() {},
+    enterCancelled() {},
+    beforeLeave() {},
+    leave() {},
+    afterLeave() {},
+    leaveCancelled() {},
   }
 };
 </script>
@@ -62,11 +116,18 @@ export default {
   opacity: 0;
 }
 
+.slide-enter,
+.slide-leave-to {
+  opacity: 0;
+}
+
 .slide-enter-active {
   animation: slide-in 0.5s;
+  transition: opacity 1s;
 }
 .slide-leave-active {
   animation: slide-in 0.5s reverse;
+  transition: opacity 1s;
 }
 
 @keyframes slide-in {
@@ -76,5 +137,13 @@ export default {
   to {
     transform: translateX(0)
   }
+}
+
+.circle {
+  width: 200px;
+  height: 200px;
+  margin: auto;
+  border-radius: 100px;
+  background-color: deeppink;
 }
 </style>
